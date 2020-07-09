@@ -7,5 +7,5 @@ public interface SudokuBoard {
 	public Object clone();
 	public int[] findFirstNonEmpty();
 	public Cell[][] getBoard(int boardNum);
-	public void add(int row, int col, int num, int boardNum);
+	public void add(int row, int col, int num, int boardNum);	
 }

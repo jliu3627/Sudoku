@@ -1,10 +1,11 @@
 package sudokuGame;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-// represents a double sudoku board
-public class DoubleBoard implements Cloneable, SudokuBoard {
+// represents a samurai sudoku board
+public class SamuraiBoard implements Cloneable, SudokuBoard {
 	// length of overlapping boxes
 	private static int overlap = 1;
 	// size of the board
@@ -12,27 +13,55 @@ public class DoubleBoard implements Cloneable, SudokuBoard {
 	// the boards
 	protected HashMap<Integer, SingleBoard> boards;
 	
-	public DoubleBoard() {
+	public SamuraiBoard() {
 		boards = new HashMap<>();
-		boards.put(1, new SingleBoard("EnterBoard1"));
-		boards.put(2, new SingleBoard("EnterBoard2"));
+		for (int i=1; i<=5; i++) {
+			boards.put(i, new SingleBoard("EnterBoard"+i));
+		}
 				
-		// sets the shared cells for the boards
+		// sets the shared cells for the boards		
 		int newRow=0, newCol=0;
 		// start at size*(size-overlap)
 		for (int r=size*(size-overlap); r<size*size; r++) {			
 			for (int c=size*(size-overlap); c<size*size; c++) {
-				// set shared cells
-				boards.get(1).board[r][c].setShared(newRow, newCol, 2);
-				boards.get(2).board[newRow][newCol].setShared(r, c, 1);
-				// throw exception if boards overlap correctly
-				if (boards.get(1).board[r][c].val!=boards.get(2).board[newRow][newCol].val) {
-					throw new IllegalArgumentException("Boards sharing do not match");
+				// cells shared for top left and center board
+				boards.get(1).board[r][c].setShared(newRow, newCol, 3);
+				boards.get(3).board[newRow][newCol].setShared(r, c, 1);
+				if (boards.get(1).board[r][c].val!=boards.get(3).board[newRow][newCol].val) {
+					throw new IllegalArgumentException("Cells sharing do not match");
+				}
+				// cells shared for the center and bottom right board
+				boards.get(3).board[r][c].setShared(newRow, newCol, 5);
+				boards.get(5).board[newRow][newCol].setShared(r, c, 3);
+				if (boards.get(3).board[r][c].val!=boards.get(5).board[newRow][newCol].val) {
+					throw new IllegalArgumentException("Cells sharing do not match");
 				}
 				newCol++;
 			}
 			newRow++;
 			newCol = 0;
+		}
+		
+		newRow=0;
+		newCol=size*(size-overlap);
+		for (int r=size*(size-overlap); r<size*size; r++) {
+			for (int c=0/*size*overlap*/; c<size*overlap/*size*size*/; c++) {
+				// cells shared for the top right and center board
+				boards.get(2).board[r][c].setShared(newRow, newCol, 3);
+				boards.get(3).board[newRow][newCol].setShared(r, c, 2);
+				if (boards.get(2).board[r][c].val!=boards.get(3).board[newRow][newCol].val) {
+					throw new IllegalArgumentException("Cells sharing do not match");
+				}
+				// cells shared for the center and bottom left board
+				boards.get(3).board[r][c].setShared(newRow, newCol, 4);
+				boards.get(4).board[newRow][newCol].setShared(r, c, 3);
+				if (boards.get(3).board[r][c].val!=boards.get(4).board[newRow][newCol].val) {
+					throw new IllegalArgumentException("Cells sharing do not match");
+				}
+				newCol++;
+			}
+			newRow++;
+			newCol=size*(size-overlap);
 		}
 	}
 	// set correct possible values
@@ -45,10 +74,10 @@ public class DoubleBoard implements Cloneable, SudokuBoard {
 	
 	
 	// clones board
-	public DoubleBoard clone() {
-		DoubleBoard result = null;
+	public SamuraiBoard clone() {
+		SamuraiBoard result = null;
 		try {
-			result = (DoubleBoard) super.clone();
+			result = (SamuraiBoard) super.clone();
 			boards = new HashMap<>();
 			for (Integer boardNum : result.boards.keySet()) {
 				boards.put(boardNum, result.boards.get(boardNum).clone());
@@ -79,7 +108,6 @@ public class DoubleBoard implements Cloneable, SudokuBoard {
 		}
 	}
 	public void removeOtherValues(int row, int col, int num, int boardNum) {
-		// removes num from possible values
 		boards.get(boardNum).removeOtherValues(row, col, num);
 	}
 
@@ -87,7 +115,7 @@ public class DoubleBoard implements Cloneable, SudokuBoard {
 	
 	
 	
-	// returns array of the cells of the row/col/box for specified board
+	
 	public Cell[] getRow(int num, int boardNum) {
 		return boards.get(boardNum).getRow(num);
 	}
@@ -97,7 +125,6 @@ public class DoubleBoard implements Cloneable, SudokuBoard {
 	public Cell[] getBox(int num, int boardNum) {
 		return boards.get(boardNum).getBox(num);
 	}
-	// determines if find is in a row/col/box for specified board
 	public boolean inRow(int find, int row, int boardNum) {
 		for (Cell cell : getRow(row, boardNum)) {
 			if (cell.val == find) {
@@ -106,6 +133,7 @@ public class DoubleBoard implements Cloneable, SudokuBoard {
 		}
 		return false;
 	}
+	// determines if find is in a row/col/box for specified board
 	public boolean inCol(int find, int col, int boardNum) {
 		for (Cell cell : getCol(col, boardNum)) {
 			if (cell.val == find) {
@@ -205,7 +233,7 @@ public class DoubleBoard implements Cloneable, SudokuBoard {
 	
 	public String toString() {
 		String result = "";
-		for (int boardNum : boards.keySet()) {
+		for (Integer boardNum : boards.keySet()) {
 			result += boardNum + "\n" + boards.get(boardNum).toString()+ "\n";
 		}
 		return result;

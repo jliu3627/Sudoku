@@ -52,6 +52,14 @@ public class Cell implements Cloneable {
 			for (Integer num : this.pval) {
 				result.pval.add(num);
 			}
+			result.shared = new HashSet<int[]>();
+			for (int[] sharedCells : shared) {
+				int[] temp = new int[3];
+				temp[0] = sharedCells[0];
+				temp[1] = sharedCells[1];
+				temp[2] = sharedCells[2];
+				result.shared.add(temp);
+			}
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
 		}			
